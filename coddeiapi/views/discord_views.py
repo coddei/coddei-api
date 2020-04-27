@@ -1,4 +1,5 @@
 from pyramid.view import view_config
+import copy
 import re
 
 @view_config(route_name='get_member', renderer='json')
@@ -42,15 +43,15 @@ def add_member(request):
     github_url = re.findall(url_regex, data['github'])
 
     insert_dict = {
-        'name': data['name'],
+        'name': data['name'].title(),
         'username': username,
         'description': data['bio'],
-        'portfolio_url': portfolio_url if portfolio_url else None,
-        'github_url': github_url if github_url else None,
+        'portfolio_url': portfolio_url[0] if portfolio_url else None,
+        'github_url': github_url[0] if github_url else None,
         'discord': discord_data
     }
 
-    user = db.users.insert_one(insert_dict)
+    user = db.users.insert_one(copy.deepcopy(insert_dict))
 
     if user.inserted_id:
         return {'success': True, 'user': insert_dict}
