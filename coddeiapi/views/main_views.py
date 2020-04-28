@@ -1,4 +1,5 @@
 from pyramid.view import view_config
+from coddeiapi.models.Recommendation import Recommendation
 import copy
 import re
 
@@ -34,3 +35,14 @@ def add_recommendation(request):
         return {'success': True, 'recommendation': insert_dict}
 
     return {'success': False}
+
+
+# Just returning all for now, make pagination later
+@view_config(route_name='recommendations', renderer='json', request_method="GET")
+def get_recommendations(request):
+    db = request.db
+
+    recommendations = list(db.recommendations.find({}))
+    recommendations = [Recommendation.handle_recommendation(x) for x in recommendations]
+
+    return {'success': True, 'recommendations': recommendations}
