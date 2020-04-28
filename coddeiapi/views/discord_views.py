@@ -1,4 +1,6 @@
 from pyramid.view import view_config
+import copy
+import re
 
 @view_config(route_name='get_member', renderer='json')
 def get_member(request):
@@ -36,16 +38,20 @@ def add_member(request):
     if len(username.split()) > 1:
         '_'.join(username.split())
 
+    url_regex = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
+    portfolio_url = re.findall(url_regex, data['portfolio'])
+    github_url = re.findall(url_regex, data['github'])
+
     insert_dict = {
-        'name': data['name'],
+        'name': data['name'].title(),
         'username': username,
         'description': data['bio'],
-        'portfolio_url': data['portfolio'],
-        'github_url': data['github'],
+        'portfolio_url': portfolio_url[0] if portfolio_url else None,
+        'github_url': github_url[0] if github_url else None,
         'discord': discord_data
     }
 
-    user = db.users.insert_one(insert_dict)
+    user = db.users.insert_one(copy.deepcopy(insert_dict))
 
     if user.inserted_id:
         return {'success': True, 'user': insert_dict}
