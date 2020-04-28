@@ -1,4 +1,6 @@
 from pyramid.view import view_config
+import copy
+import re
 
 @view_config(route_name='recommendations', renderer='json', request_method="POST")
 def add_recommendation(request):
@@ -23,10 +25,12 @@ def add_recommendation(request):
         'description': data['description']
     }
 
-    user = db.recommendations.insert_one(copy.deepcopy(insert_dict))
+    recommendation = db.recommendations.insert_one(copy.deepcopy(insert_dict))
 
-    if user.inserted_id:
+    if recommendation.inserted_id:
         insert_dict['author'] = {'username': user.get('username')}
-        return {'success': True, 'user': insert_dict}
+        insert_dict.pop('author_id', None)
+
+        return {'success': True, 'recommendation': insert_dict}
 
     return {'success': False}
