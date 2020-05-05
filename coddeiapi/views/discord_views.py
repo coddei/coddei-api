@@ -1,10 +1,29 @@
 from pyramid.view import view_config
+from coddeiapi.utils import dump
+from bson import ObjectId
 import copy
 import re
 
-@view_config(route_name='get_member', renderer='json')
+@view_config(route_name='get_member', renderer='json', request_method="GET")
 def get_member(request):
-    return {'member': 'a'}
+    db = request.db
+    member_id = request.matchdict.get('member_id')
+
+    print(member_id)
+
+    # is obj id
+    if ObjectId.is_valid(member_id):
+        query = {'_id': ObjectId(member_id)}
+    # is discord id
+    else:
+        query = {'discord.id': member_id}
+
+    user = db.users.find_one(query)
+
+    if not user:
+        return {'success': False, 'message': 'Couldn\'t find user.'}
+
+    return {'success': True, 'user': dump(user)}
 
 
 @view_config(route_name='members', renderer='json', request_method="POST")
