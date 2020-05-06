@@ -9,8 +9,6 @@ def get_member(request):
     db = request.db
     member_id = request.matchdict.get('member_id')
 
-    print(member_id)
-
     # is obj id
     if ObjectId.is_valid(member_id):
         query = {'_id': ObjectId(member_id)}
