@@ -20,6 +20,14 @@ def dump(data):
         return False
 
 
-def uid(prefix='C'):
+def uid(prefix='C', colletion=None):
+
     _id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-    return '{}{}'.format(prefix.upper(), _id)
+    uid = '{}{}'.format(prefix.upper(), _id)
+
+    if colletion:
+        while colletion.find_one({'id': uid}):
+            _id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            uid = '{}{}'.format(prefix.upper(), _id)
+
+    return uid
