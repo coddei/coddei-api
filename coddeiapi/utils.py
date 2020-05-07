@@ -1,8 +1,7 @@
 import json
 from bson import ObjectId
 
-import random
-import string
+from coddeiapi.models.Snowflake import Snowflake
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -20,14 +19,10 @@ def dump(data):
         return False
 
 
-def uid(prefix='C', colletion=None):
+def snowflake_to_timestamp(_id):
+    s = Snowflake()
 
-    _id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-    uid = '{}{}'.format(prefix.upper(), _id)
-
-    if colletion:
-        while colletion.find_one({'id': uid}):
-            _id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-            uid = '{}{}'.format(prefix.upper(), _id)
-
-    return uid
+    _id = _id >> 22   # strip the lower 22 bits
+    _id += s.cepoch   # adjust for coddei epoch
+    _id = _id / 1000  # convert from milliseconds to seconds
+    return _id
