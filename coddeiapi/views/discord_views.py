@@ -53,7 +53,7 @@ def add_member(request):
 
     username = data['nick']
     if len(username.split()) > 1:
-        '_'.join(username.split())
+        username = '_'.join(username.split())
 
     url_regex = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
     portfolio_url = re.findall(url_regex, data['portfolio'])
@@ -62,6 +62,7 @@ def add_member(request):
     insert_dict = {
         '_id': next(snowflake),
         'name': data['name'].title(),
+        'nickname': data['nick'],
         'username': username,
         'description': data['bio'],
         'portfolio_url': portfolio_url[0] if portfolio_url else None,
