@@ -5,7 +5,7 @@ import re
 import datetime
 
 
-@view_config(route_name='get_member', renderer='json', request_method="GET")
+@view_config(route_name='member', renderer='json', request_method="GET")
 def get_member(request):
     db = request.db
     member_id = request.matchdict.get('member_id')
@@ -14,6 +14,44 @@ def get_member(request):
 
     if not user:
         return {'success': False, 'message': 'Couldn\'t find user.'}
+
+    return {'success': True, 'user': User.handle_user(user)}
+
+
+@view_config(route_name='member', renderer='json', request_method="PUT")
+def update_member(request):
+    db = request.db
+    member_id = request.matchdict.get('member_id')
+
+    if not request.body:
+        return {'success': False}
+
+    data = request.json_body
+
+    user = db.users.find_one({'discord.id': int(member_id)})
+
+    if not user:
+        return {'success': False, 'message': 'Couldn\'t find user.'}
+
+    set_dict = {}
+
+    url_regex = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
+
+    if 'github' in data:
+        github_url = re.findall(url_regex, data['github'])
+        set_dict['github_url'] = github_url[0] if github_url else None
+    if 'portfolio' in data:
+        portfolio_url = re.findall(url_regex, data['portfolio'])
+        set_dict['portfolio_url'] = portfolio_url[0] if portfolio_url else None
+    if 'nick' in data:
+        set_dict['nickname'] = data['nick']
+    if 'bio' in data:
+        set_dict['description'] = data['bio']        
+
+    if not set_dict:
+        return {'success': False, 'message': 'Nothing to update'}
+
+    db.users.update_one({'_id': user['_id']}, {'$set': set_dict})
 
     return {'success': True, 'user': User.handle_user(user)}
 
