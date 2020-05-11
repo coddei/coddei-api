@@ -8,7 +8,7 @@ import os
 
 def main(global_config, **settings):
 
-    api_version = 'v1'
+    api_version = settings['api_version']
 
     config = Configurator(
         settings=settings
@@ -23,7 +23,7 @@ def main(global_config, **settings):
         return MongoClient(mongo_url, int(mongo_port))[db_name]
 
     config.add_request_method(get_db, 'db', reify=True)
-    config.include('.routes', route_prefix='api/{}'.format(api_version))
+    config.include('.routes', route_prefix='api/v{}'.format(api_version))
 
     config.include('pyramid_services')
     config.register_service(Snowflake().generator(1, 1), name='snowflake')
